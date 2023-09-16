@@ -45,6 +45,23 @@ const tempWatchedData = [
   },
 ];
 
+interface Movie {
+  imdbID: string;
+  Title: string;
+  Year: string;
+  Poster: string;
+}
+
+interface WatchedMovie {
+  imdbID: string;
+  Title: string;
+  Year: string;
+  Poster: string;
+  runtime: number;
+  imdbRating: number;
+  userRating: number;
+}
+
 const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const Search = () => {
@@ -62,31 +79,33 @@ const Logo = () => {
   );
 };
 
-const NumResults = () => {
+interface NumResultsProps {
+  movies: Movie[];
+}
+
+const NumResults: FC<NumResultsProps> = ({ movies }) => {
   return (
     <p className='num-results'>
-      Found <strong>X</strong> results
+      Found <strong>{movies.length}</strong> results
     </p>
   );
 };
 
-const NavBar = () => {
+interface NavBarProps {
+  children: React.ReactNode;
+}
+
+const NavBar: FC<NavBarProps> = ({ children }) => {
   return (
     <nav className='nav-bar'>
       <Logo />
-      <Search />
-      <NumResults />
+      {children}
     </nav>
   );
 };
 
 interface MovieProps {
-  movie: {
-    imdbID: string;
-    Title: string;
-    Year: string;
-    Poster: string;
-  };
+  movie: Movie;
 }
 
 const Movie: FC<MovieProps> = ({ movie }) => {
@@ -104,9 +123,11 @@ const Movie: FC<MovieProps> = ({ movie }) => {
   );
 };
 
-const MovieList = () => {
-  const [movies, setMovies] = useState(tempMovieData);
+interface MovieListProps {
+  movies: Movie[];
+}
 
+const MovieList: FC<MovieListProps> = ({ movies }) => {
   return (
     <ul className='list'>
       {movies?.map((movie) => (
@@ -116,29 +137,25 @@ const MovieList = () => {
   );
 };
 
-const ListBox = () => {
-  const [isOpen1, setIsOpen1] = useState(true);
+interface ListBoxProps {
+  children: React.ReactNode;
+}
+
+const Box: FC<ListBoxProps> = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className='box'>
-      <button className='btn-toggle' onClick={() => setIsOpen1((open) => !open)}>
-        {isOpen1 ? '–' : '+'}
+      <button className='btn-toggle' onClick={() => setIsOpen((open) => !open)}>
+        {isOpen ? '–' : '+'}
       </button>
-      {isOpen1 && <MovieList />}
+      {isOpen && children}
     </div>
   );
 };
 
 interface WatchedSummaryProps {
-  watched: {
-    imdbID: string;
-    Title: string;
-    Year: string;
-    Poster: string;
-    runtime: number;
-    imdbRating: number;
-    userRating: number;
-  }[];
+  watched: WatchedMovie[];
 }
 
 const WatchedSummary: FC<WatchedSummaryProps> = ({ watched }) => {
@@ -172,15 +189,7 @@ const WatchedSummary: FC<WatchedSummaryProps> = ({ watched }) => {
 };
 
 interface WatchedMovieProps {
-  movie: {
-    imdbID: string;
-    Title: string;
-    Year: string;
-    Poster: string;
-    runtime: number;
-    imdbRating: number;
-    userRating: number;
-  };
+  movie: WatchedMovie;
 }
 
 const WatchedMovie: FC<WatchedMovieProps> = ({ movie }) => {
@@ -207,15 +216,7 @@ const WatchedMovie: FC<WatchedMovieProps> = ({ movie }) => {
 };
 
 interface WatchedListProps {
-  watched: {
-    imdbID: string;
-    Title: string;
-    Year: string;
-    Poster: string;
-    runtime: number;
-    imdbRating: number;
-    userRating: number;
-  }[];
+  watched: WatchedMovie[];
 }
 
 const WatchedMoviesList: FC<WatchedListProps> = ({ watched }) => {
@@ -228,41 +229,51 @@ const WatchedMoviesList: FC<WatchedListProps> = ({ watched }) => {
   );
 };
 
-const WatchedBox = () => {
-  const [watched, setWatched] = useState(tempWatchedData);
+// const WatchedBox = () => {
+//   const [watched, setWatched] = useState(tempWatchedData);
 
-  const [isOpen2, setIsOpen2] = useState(true);
+//   const [isOpen2, setIsOpen2] = useState(true);
 
-  return (
-    <div className='box'>
-      <button className='btn-toggle' onClick={() => setIsOpen2((open) => !open)}>
-        {isOpen2 ? '–' : '+'}
-      </button>
-      {isOpen2 && (
-        <>
-          <WatchedSummary watched={watched} />
+//   return (
+//     <div className='box'>
+//       <button className='btn-toggle' onClick={() => setIsOpen2((open) => !open)}>
+//         {isOpen2 ? '–' : '+'}
+//       </button>
+//       {isOpen2 && (
 
-          <WatchedMoviesList watched={watched} />
-        </>
-      )}
-    </div>
-  );
-};
+//       )}
+//     </div>
+//   );
+// };
 
-const Main = () => {
-  return (
-    <main className='main'>
-      <ListBox />
-      <WatchedBox />
-    </main>
-  );
+interface MainProps {
+  children: React.ReactNode;
+}
+
+const Main: FC<MainProps> = ({ children }) => {
+  return <main className='main'>{children}</main>;
 };
 
 export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
+
   return (
     <>
-      <NavBar />
-      <Main />
+      <NavBar>
+        <Search />
+        <NumResults movies={movies} />
+      </NavBar>
+      <Main>
+        <Box>
+          <MovieList movies={movies} />
+        </Box>
+
+        <Box>
+          <WatchedSummary watched={watched} />
+          <WatchedMoviesList watched={watched} />
+        </Box>
+      </Main>
     </>
   );
 }

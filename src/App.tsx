@@ -1,49 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-
-// const tempMovieData = [
-//   {
-//     imdbID: 'tt1375666',
-//     Title: 'Inception',
-//     Year: '2010',
-//     Poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg',
-//   },
-//   {
-//     imdbID: 'tt0133093',
-//     Title: 'The Matrix',
-//     Year: '1999',
-//     Poster:
-//       'https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg',
-//   },
-//   {
-//     imdbID: 'tt6751668',
-//     Title: 'Parasite',
-//     Year: '2019',
-//     Poster:
-//       'https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg',
-//   },
-// ];
-
-// const tempWatchedData = [
-//   {
-//     imdbID: 'tt1375666',
-//     Title: 'Inception',
-//     Year: '2010',
-//     Poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg',
-//     runtime: 148,
-//     imdbRating: 8.8,
-//     userRating: 10,
-//   },
-//   {
-//     imdbID: 'tt0088763',
-//     Title: 'Back to the Future',
-//     Year: '1985',
-//     Poster:
-//       'https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg',
-//     runtime: 116,
-//     imdbRating: 8.5,
-//     userRating: 9,
-//   },
-// ];
+import StarRating from './components/StarRating';
 
 const KEY = '2cbdbd96';
 
@@ -56,9 +12,9 @@ interface Movie {
 
 interface WatchedMovie {
   imdbID: string;
-  Title: string;
+  title: string;
   Year: string;
-  Poster: string;
+  poster: string;
   runtime: number;
   imdbRating: number;
   userRating: number;
@@ -119,11 +75,12 @@ const NavBar: FC<NavBarProps> = ({ children }) => {
 
 interface MovieProps {
   movie: Movie;
+  onSelectMovie: (id: string) => void;
 }
 
-const Movie: FC<MovieProps> = ({ movie }) => {
+const Movie: FC<MovieProps> = ({ movie, onSelectMovie }) => {
   return (
-    <li>
+    <li onClick={() => onSelectMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -138,13 +95,14 @@ const Movie: FC<MovieProps> = ({ movie }) => {
 
 interface MovieListProps {
   movies: Movie[];
+  onSelectMovie: (id: string) => void;
 }
 
-const MovieList: FC<MovieListProps> = ({ movies }) => {
+const MovieList: FC<MovieListProps> = ({ movies, onSelectMovie }) => {
   return (
-    <ul className='list'>
+    <ul className='list list-movies'>
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie movie={movie} key={movie.imdbID} onSelectMovie={onSelectMovie} />
       ))}
     </ul>
   );
@@ -186,11 +144,11 @@ const WatchedSummary: FC<WatchedSummaryProps> = ({ watched }) => {
         </p>
         <p>
           <span>⭐️</span>
-          <span>{avgImdbRating}</span>
+          <span>{avgImdbRating.toFixed(2)}</span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating}</span>
+          <span>{avgUserRating.toFixed(2)}</span>
         </p>
         <p>
           <span>⏳</span>
@@ -203,13 +161,14 @@ const WatchedSummary: FC<WatchedSummaryProps> = ({ watched }) => {
 
 interface WatchedMovieProps {
   movie: WatchedMovie;
+  onDeleteWatched: (id: string) => void;
 }
 
-const WatchedMovie: FC<WatchedMovieProps> = ({ movie }) => {
+const WatchedMovie: FC<WatchedMovieProps> = ({ movie, onDeleteWatched }) => {
   return (
     <li>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
+      <img src={movie.poster} alt={`${movie.title} poster`} />
+      <h3>{movie.title}</h3>
       <div>
         <p>
           <span>⭐️</span>
@@ -223,6 +182,9 @@ const WatchedMovie: FC<WatchedMovieProps> = ({ movie }) => {
           <span>⏳</span>
           <span>{movie.runtime} min</span>
         </p>
+        <button className='btn-delete' onClick={() => onDeleteWatched(movie.imdbID)}>
+          X
+        </button>
       </div>
     </li>
   );
@@ -230,13 +192,14 @@ const WatchedMovie: FC<WatchedMovieProps> = ({ movie }) => {
 
 interface WatchedListProps {
   watched: WatchedMovie[];
+  onDeleteWatched: (id: string) => void;
 }
 
-const WatchedMoviesList: FC<WatchedListProps> = ({ watched }) => {
+const WatchedMoviesList: FC<WatchedListProps> = ({ watched, onDeleteWatched }) => {
   return (
     <ul className='list'>
       {watched.map((movie) => (
-        <WatchedMovie key={movie.imdbID} movie={movie} />
+        <WatchedMovie key={movie.imdbID} movie={movie} onDeleteWatched={onDeleteWatched} />
       ))}
     </ul>
   );
@@ -266,13 +229,138 @@ const ErrorMessage: FC<ErrorMessageProps> = ({ message }) => {
   );
 };
 
+interface MovieDetailsProps {
+  selectedId: string;
+  onCloseMovie: () => void;
+  onAddWatched: (movie: any) => void;
+  watched: any;
+}
+
+const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWatched, watched }) => {
+  const [movie, setMovie] = useState<any>({});
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+
+  const isWatched = watched.map((item: any) => item.imdbID).includes(selectedId);
+  const watchedRating = watched.find((movie: any) => movie.imdbID === selectedId)?.userRating;
+
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = movie;
+
+  const handleAdd = () => {
+    const newWatchedMovie = {
+      imdbID: selectedId,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(' ').at(0)),
+      userRating,
+    };
+
+    onAddWatched(newWatchedMovie);
+    onCloseMovie();
+  };
+
+  useEffect(() => {
+    async function fetchMovieDetails() {
+      setIsDetailsLoading(true);
+      const res = await fetch(`https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`);
+
+      const data = await res.json();
+      setMovie(data);
+      setIsDetailsLoading(false);
+    }
+
+    fetchMovieDetails();
+  }, [selectedId]);
+
+  return (
+    <div className='details'>
+      {isDetailsLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className='btn-back' onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img src={poster} alt={`Poster of ${movie}`} />
+            <div className='details-overview'>
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p>{genre}</p>
+              <p>
+                <span>⭐</span>
+                {imdbRating} IMDb Rating
+              </p>
+            </div>
+          </header>
+
+          <section>
+            <div className='rating'>
+              {!isWatched ? (
+                <>
+                  <StarRating maxRating={10} size={24} onSetRating={setUserRating} />
+                  {userRating > 0 && (
+                    <button className='btn-add' onClick={handleAdd}>
+                      + Add to list
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p>You have already rate this movie with {watchedRating}⭐</p>
+              )}
+            </div>
+
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+          {selectedId}
+        </>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('interstellar');
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState<any>([]);
   const [isMoviesLoading, setIsMovieLoading] = useState(false);
   const [error, setError] = useState('');
-  const tempQuery = 'interstellar';
+  const [selectedId, setSelectedId] = useState('');
+
+  const handleSelectMovie = (id: string) => {
+    setSelectedId((prev) => (prev === id ? '' : id));
+  };
+
+  const handleCloseMovie = () => {
+    setSelectedId('');
+  };
+
+  const handleAddWatched = (movie: any) => {
+    setWatched((prev: any) => [...prev, movie]);
+  };
+
+  const handleDeleteWatched = (id: string) => {
+    setWatched((watched: any) => watched.filter((movie: any) => movie.imdbID !== id));
+  };
 
   useEffect(() => {
     async function fetchMovies() {
@@ -318,13 +406,24 @@ export default function App() {
         <Box>
           {/* {isMoviesLoading ? <Loader /> : <MovieList movies={movies} />} */}
           {isMoviesLoading && <Loader />}
-          {!isMoviesLoading && !error && <MovieList movies={movies} />}
+          {!isMoviesLoading && !error && <MovieList movies={movies} onSelectMovie={handleSelectMovie} />}
           {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedMoviesList watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+              onAddWatched={handleAddWatched}
+              watched={watched}
+            />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedMoviesList watched={watched} onDeleteWatched={handleDeleteWatched} />
+            </>
+          )}
         </Box>
       </Main>
     </>

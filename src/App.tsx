@@ -361,10 +361,15 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
 export default function App() {
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState<any>([]);
   const [isMoviesLoading, setIsMovieLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState('');
+
+  // const [watched, setWatched] = useState<any>([]);
+  const [watched, setWatched] = useState<any>(() => {
+    const storedValue = localStorage.getItem('watched');
+    return JSON.parse(storedValue);
+  });
 
   const handleSelectMovie = (id: string) => {
     setSelectedId((prev) => (prev === id ? '' : id));
@@ -381,6 +386,10 @@ export default function App() {
   const handleDeleteWatched = (id: string) => {
     setWatched((watched: any) => watched.filter((movie: any) => movie.imdbID !== id));
   };
+
+  useEffect(() => {
+    localStorage.setItem('watched', JSON.stringify(watched));
+  }, [watched]);
 
   useEffect(() => {
     const controller = new AbortController();

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import StarRating from './components/StarRating';
 
 const KEY = '2cbdbd96';
@@ -28,6 +28,25 @@ interface SearchProps {
 }
 
 const Search: FC<SearchProps> = ({ query, setQuery }) => {
+  const inputEl = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function callback(e: KeyboardEvent) {
+      if (document.activeElement === inputEl.current) return;
+
+      if (e.key === 'Enter') {
+        inputEl?.current?.focus();
+        setQuery('');
+      }
+    }
+
+    document.addEventListener('keydown', callback);
+
+    return function () {
+      document.removeEventListener('keydown', callback);
+    };
+  }, [setQuery]);
+
   return (
     <input
       className='search'
@@ -35,6 +54,7 @@ const Search: FC<SearchProps> = ({ query, setQuery }) => {
       placeholder='Search movies...'
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 };

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import StarRating from './components/StarRating';
 
 const KEY = '2cbdbd96';
@@ -273,6 +273,18 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
   };
 
   useEffect(() => {
+    function callback(e: KeyboardEvent) {
+      if (e.code === 'Escape') {
+        onCloseMovie();
+      }
+    }
+
+    document.addEventListener('keydown', callback);
+
+    return () => document.removeEventListener('keydown', callback);
+  }, [onCloseMovie]);
+
+  useEffect(() => {
     async function fetchMovieDetails() {
       setIsDetailsLoading(true);
       const res = await fetch(`https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`);
@@ -347,7 +359,7 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
 };
 
 export default function App() {
-  const [query, setQuery] = useState('interstellar');
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState<any>([]);
   const [isMoviesLoading, setIsMovieLoading] = useState(false);
@@ -371,11 +383,13 @@ export default function App() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchMovies() {
       try {
         setIsMovieLoading(true);
         setError('');
-        const res = await fetch(`https://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+        const res = await fetch(`https://www.omdbapi.com/?apikey=${KEY}&s=${query}`, { signal: controller.signal });
 
         if (!res.ok) {
           throw new Error('Something went wrong with fetching movies 😥');
@@ -387,9 +401,13 @@ export default function App() {
         }
 
         setMovies(data.Search);
+        setError('');
       } catch (error: any) {
         console.error(error.message);
-        setError(error.message);
+
+        if (error.name !== 'AbortError') {
+          setError(error.message);
+        }
       } finally {
         setIsMovieLoading(false);
       }
@@ -401,7 +419,12 @@ export default function App() {
       return;
     }
 
+    handleCloseMovie();
     fetchMovies();
+
+    return function () {
+      controller.abort();
+    };
   }, [query]);
 
   return (
@@ -412,7 +435,6 @@ export default function App() {
       </NavBar>
       <Main>
         <Box>
-          {/* {isMoviesLoading ? <Loader /> : <MovieList movies={movies} />} */}
           {isMoviesLoading && <Loader />}
           {!isMoviesLoading && !error && <MovieList movies={movies} onSelectMovie={handleSelectMovie} />}
           {error && <ErrorMessage message={error} />}

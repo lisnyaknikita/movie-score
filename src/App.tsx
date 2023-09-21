@@ -285,6 +285,15 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
     fetchMovieDetails();
   }, [selectedId]);
 
+  useEffect(() => {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
+
+    return () => {
+      document.title = 'Movie score';
+    };
+  }, [title]);
+
   return (
     <div className='details'>
       {isDetailsLoading ? (
@@ -321,7 +330,7 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
                   )}
                 </>
               ) : (
-                <p>You have already rate this movie with {watchedRating}⭐</p>
+                <p>You have already rated this movie with {watchedRating}⭐</p>
               )}
             </div>
 
@@ -331,7 +340,6 @@ const MovieDetails: FC<MovieDetailsProps> = ({ selectedId, onCloseMovie, onAddWa
             <p>Starring {actors}</p>
             <p>Directed by {director}</p>
           </section>
-          {selectedId}
         </>
       )}
     </div>

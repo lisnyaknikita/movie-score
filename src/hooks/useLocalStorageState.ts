@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { IWatchedMovieInList } from '../types/types';
 
-export function useLocalStorageState(initialState: any, key: string) {
-  const [value, setValue] = useState<any>(() => {
+export function useLocalStorageState(initialState: IWatchedMovieInList | [], key: string) {
+  const [value, setValue] = useState<IWatchedMovieInList | []>(() => {
     const storedValue = localStorage.getItem(key);
     return storedValue ? JSON.parse(storedValue) : initialState;
   });
